@@ -15,7 +15,7 @@ class Task{
         $this->naslov = $naslov;
         $this->opis = $opis;
         $this->prioritet = $prioritet;
-        $this->vreme = date("d.m.y. h:m");
+        $this->vreme = date("d.m. h:m");
     }
     
 
