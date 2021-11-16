@@ -10,19 +10,14 @@ if(isset($_POST['username']) && isset($_POST['password'])){
     $user = new User(1, $uname, $upass);
     $response = User::logInUser($user, $conn);
 
-    if($odg->num_rows==1){
-        echo  `
-        <script>
-        alert( "Uspešno ste se prijavili");
-        </script>
-        `;
-        $_SESSION['user_id'] = $korisnik->id;
+    if($response->num_rows==1){
+        $_SESSION['user_id'] = $user->id;
         header('Location: todo.php');
         exit();
     }else{
         echo `
         <script>
-        alert( "Niste se prijavili!");
+        alert("Niste se prijavili!");
         </script>
         `;
     }
@@ -54,7 +49,7 @@ if(isset($_POST['username']) && isset($_POST['password'])){
                         </div>
                         <div class="form-group">
                             <label for="password" >Password:</label><br>
-                            <input type="text" name="password" id="password" class="form-control">
+                            <input type="password" name="password" id="password" class="form-control">
                         </div>
                         <div class="form-grop mt-4 text-white">
                           <input type="submit" name="submit" style="color: white;" class="btn btn-info btn-md" value="submit">

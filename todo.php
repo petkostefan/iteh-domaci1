@@ -1,3 +1,21 @@
+<?php
+require "dbBroker.php";
+require "model/task.php";
+
+session_start();
+
+if(!isset($_SESSION['user_id'])){
+	header('Location:index.php');
+	exit();
+}
+
+$data = Task::getByUser($_SESSION['user_id'], $conn);
+if (!$data) {
+    echo "Nastala je greška pri preuzimanju podataka";
+    die();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,26 +35,31 @@
 			<div id="form-wrapper">
 				<form id="form">
 					<div class="flex-wrapper">
+					<input id="id" class="form-control" type="hidden" name="id">
 						<div style="flex: 10">
-							<label for="prioritet">Naziv</label>
+							<label for="title">Naziv</label>
 							<input id="title" class="form-control" type="text" name="title" placeholder="Naziv zadatka">
 						</div>
 						<div style="flex: 1;"></div>
 						<div style="flex: 3">
-							<label for="prioritet">Prioritet</label>
-							<input id="prioritet" class="form-control" type="number" name="priority" placeholder="1-10">
+							<label for="priority">Prioritet</label>
+							<input id="priority" class="form-control" type="number" name="priority" placeholder="1-10">
 						</div>
 						<div class="break"></div>
 						<div style="flex: 10">
-							<label for="prioritet">Opis</label>
-							<input id="description" class="form-control" type="text" name="title" placeholder="Opis zadatka">
+							<label for="description">Opis</label>
+							<input id="description" class="form-control" type="text" name="description" placeholder="Opis zadatka">
+							<input type="hidden" name="user_id"  value="<?php echo $_SESSION['user_id'];?>">
 						</div>
 						<div class="break"></div>
-						<div style="flex: 2">
-							<input id="submit" class="btn" value="Dodaj zadatak" type="submit" >
+						<div style="flex: 1">
+							<input id="submit" class="btn" value="Potvrdi" type="submit" >
 						</div>
-						<div style="flex: 2">
-							<button id="sort" style="float: right;" class="btn btn-info">Sortiraj po prioritetu</button>
+						<div style="flex: 1 text-center">
+							<input id="submit" class="btn" value="Poništi" type="reset" onclick="ponisti();" >
+						</div>
+						<div style="flex: 6">
+							<button style="float: right;" onclick="sortByPriority();" class="btn btn-info">Sortiraj po prioritetu</button>
 						</div>
 					</div>
 				</form>
@@ -54,174 +77,36 @@
                         Datum i vreme
                     </div>
                 </div>
-                <div id="data-row-${i}" class="task-wrapper flex-wrapper">
-                    <div title="Uradi domaci da bi mogao sto pre da se odmaras" style="flex:7">
-                        Uradi domaci
+				<div id="sort">
+				<?php
+                    foreach(array_reverse($data) as $row):
+                ?>
+                <div id="data-row-<?php echo $row['id'] ?>" class="task-wrapper flex-wrapper">
+                    <div title="<?php echo $row['opis'] ?>" style="flex:7">
+					<?php echo $row['naslov'] ?>
                     </div>
 					<div style="flex:1">
-                        1
+					<?php echo $row['prioritet'] ?>
                     </div>
 					<div style="flex:2">
-                        20.11. 14:87
+					<?php $date = new DateTime($row['vreme']); echo $date->format("d.m. H:m"); ?>
                     </div>
                     <div style="flex:1">
-                        <button class="btn btn-sm btn-outline-info edit">Uredi</button>
+                        <button class="btn btn-sm btn-outline-info edit" 
+						onclick="uredi(<?php echo $row['id'] ?>, '<?php echo $row['naslov'] ?>', <?php echo $row['prioritet'] ?>, '<?php echo $row['opis'] ?>');">Uredi</button>
                     </div>
                     <div style="flex:1">
-                        <button class="btn btn-sm btn-outline-danger delete">Obriši</button>
+                        <button class="btn btn-sm btn-outline-danger delete" onclick="obrisi(<?php echo $row['id'] ?>);">Obriši</button>
                     </div>
                 </div>
+				<?php
+				endforeach;
+				?>
+				</div>
 			</div>	
 		</div>
-
 	</div>
-
-	<script type="text/javascript">
-
-		var activeItem = null
-		var list_snapshot = []
-
-		buildList()
-
-		function buildList(){
-			var wrapper = document.getElementById('list-wrapper')
-
-			var url = 'http://127.0.0.1:8000/api/task-list/'
-
-			fetch(url)
-			.then((resp) => resp.json())
-			.then(function(data){
-				console.log('Data:', data)
-
-				var list = data
-				for (var i in list){
-					try{
-						document.getElementById(`data-row-${i}`).remove()
-					}catch(err){
-
-					}
-
-					var title = `<span class="title">${list[i].title}</span>`
-					if (list[i].completed == true){
-						title = `<strike class="title">${list[i].title}</strike>`
-					}
-
-					var item = `
-						<div id="data-row-${i}" class="task-wrapper flex-wrapper">
-							<div style="flex:7">
-								${title}
-							</div>
-							<div style="flex:1">
-								<button class="btn btn-sm btn-outline-info edit">Edit </button>
-							</div>
-							<div style="flex:1">
-								<button class="btn btn-sm btn-outline-dark delete">-</button>
-							</div>
-						</div>
-					`
-					wrapper.innerHTML += item
-				}
-
-				if (list_snapshot.length > list.length){
-					for (var i = list.length; i < list_snapshot.length; i++){
-						document.getElementById(`data-row-${i}`).remove()
-					}
-				}
-
-				list_snapshot = list
-
-
-				for (var i in list){
-					var editBtn = document.getElementsByClassName('edit')[i]
-					var deleteBtn = document.getElementsByClassName('delete')[i]
-					var title = document.getElementsByClassName('title')[i]
-
-
-					editBtn.addEventListener('click', (function(item){
-						return function(){
-							editItem(item)
-						}
-					})(list[i]))
-
-
-					deleteBtn.addEventListener('click', (function(item){
-						return function(){
-							deleteItem(item)
-						}
-					})(list[i]))
-
-					
-					title.addEventListener('click', (function(item){
-						return function(){
-							strikeUnstrike(item)
-						}
-					})(list[i]))
-				}
-			})
-		}
-
-
-		var form = document.getElementById('form-wrapper')
-		form.addEventListener('submit', function(e){
-			e.preventDefault()
-			console.log('Form submitted')
-			var url = 'http://127.0.0.1:8000/api/task-create/'
-			if (activeItem != null){
-				var url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}/`
-				activeItem = null
-			}
-
-			var title = document.getElementById('title').value
-			fetch(url, {
-				method:'POST',
-				headers:{
-					'Content-type':'application/json',
-				},
-				body:JSON.stringify({'title':title})
-			}
-			).then(function(response){
-				buildList()
-				document.getElementById('form').reset()
-			})
-		})
-
-
-		function editItem(item){
-			console.log('Item clicked:', item)
-			activeItem = item
-			document.getElementById('title').value = activeItem.title
-		}
-
-
-		function deleteItem(item){
-			console.log('Delete clicked')
-			fetch(`http://127.0.0.1:8000/api/task-delete/${item.id}/`, {
-				method:'DELETE', 
-				headers:{
-					'Content-type':'application/json',
-				}
-			}).then((response) => {
-				buildList()
-			})
-		}
-
-		function strikeUnstrike(item){
-			console.log('Strike clicked')
-
-			item.completed = !item.completed
-			fetch(`http://127.0.0.1:8000/api/task-update/${item.id}/`, {
-				method:'POST', 
-				headers:{
-					'Content-type':'application/json',
-				},
-				body:JSON.stringify({'title':item.title, 'completed':item.completed})
-			}).then((response) => {
-				buildList()
-			})
-		}
-
-
-	</script>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
