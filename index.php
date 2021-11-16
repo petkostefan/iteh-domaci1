@@ -7,11 +7,11 @@ if(isset($_POST['username']) && isset($_POST['password'])){
     $uname = $_POST['username'];
     $upass = $_POST['password'];
 
-    $user = new User(1, $uname, $upass);
+    $user = new User(null, $uname, $upass);
     $response = User::logInUser($user, $conn);
 
     if($response->num_rows==1){
-        $_SESSION['user_id'] = $user->id;
+        $_SESSION['user_id'] = $response->fetch_array()['id'];
         header('Location: todo.php');
         exit();
     }else{

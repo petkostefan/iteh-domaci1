@@ -10,10 +10,7 @@ if(!isset($_SESSION['user_id'])){
 }
 
 $data = Task::getByUser($_SESSION['user_id'], $conn);
-if (!$data) {
-    echo "Nastala je greška pri preuzimanju podataka";
-    die();
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -33,6 +30,7 @@ if (!$data) {
 		<h1 style="letter-spacing: .2em;" class="font-weight-bold text-light text-center mt-5 mb-n5">TO DO</h1>
 		<div id="task-container">
 			<div id="form-wrapper">
+				<div class="text-center text-danger" id="message"></div>
 				<form id="form">
 					<div class="flex-wrapper">
 					<input id="id" class="form-control" type="hidden" name="id">
@@ -89,7 +87,7 @@ if (!$data) {
 					<?php echo $row['prioritet'] ?>
                     </div>
 					<div style="flex:2">
-					<?php $date = new DateTime($row['vreme']); echo $date->format("d.m. H:m"); ?>
+					<?php $date = new DateTime($row['vreme']); echo $date->format("d.m. H:i"); ?>
                     </div>
                     <div style="flex:1">
                         <button class="btn btn-sm btn-outline-info edit" 

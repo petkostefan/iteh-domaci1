@@ -1,3 +1,7 @@
+message = document.getElementById('message');
+title = document.getElementById('title');
+priority = document.getElementById('priority');
+
 $('#form').submit(function(){
     event.preventDefault();
     const $form =$(this);
@@ -18,6 +22,13 @@ $('#form').submit(function(){
     req.done(function(res, textStatus, jqXHR){
         if(res=="Success"){
             location.reload(true);
+        }else if(res=="fieldError"){
+            message.innerHTML = "Polje prioritet mora imati vrednost 1-10"
+            priority.classList.add("red")
+        }else if(res=="emptyError"){
+            message.innerHTML = "Polja 'Naslov' i 'Prioritet' su obavezna"
+            priority.classList.add("red")
+            title.classList.add("red")
         }else console.log("Zadatak nije dodat "+res);
         console.log(res);
     });
@@ -55,6 +66,13 @@ function urediAjax(serijalizacija){
     req.done(function(res, textStatus, jqXHR){
         if(res=="Success"){
             location.reload(true);
+        }else if(res=="fieldError"){
+            message.innerHTML = "Polje prioritet mora imati vrednost 1-10"
+            priority.classList.add("red")
+        }else if(res=="emptyError"){
+            message.innerHTML = "Polja 'Naslov' i 'Prioritet' su obavezna"
+            priority.classList.add("red")
+            title.classList.add("red")
         }else console.log("Zadatak nije uredjen "+res);
         console.log(res);
     });

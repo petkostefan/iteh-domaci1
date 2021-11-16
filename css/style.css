@@ -75,4 +75,12 @@ h1, h2, h3, h4, h5, p, span, strike{
   margin-top: -85px;
 }
 
-  
+.red{
+  border: 1px solid  red !important;
+}
+
+@media only screen and (max-width: 600px) {
+  html {
+    font-size: 0.9em;
+  }
+}
