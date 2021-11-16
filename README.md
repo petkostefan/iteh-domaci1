@@ -9,5 +9,5 @@ To do je aplikacija koja omogućava korisnicima da upravljaju svojim zadacima.
 - Forma koja služi za dodavnje novih zadataka;
 - Identična forma se automatski popunjava i služi za izmenu zadatka nakon pritiska na dugme "Uredi" pored svakog zadatka;
 - Poništavanje napravljenih izmena - dugme "Poništi";
-- Dugme za sortiranje po prioritetu;
+- Sortiranje zadataka po prioritetu od većeg ka manjem pomoću dugmeta "Sortiraj po prioritetu";
 - Pored svakog zadatka nalazi se i dugme za izmenu i brisanje istog.
